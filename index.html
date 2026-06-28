@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur — 2ème Année Médecine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #0a1628;
+    --blue:   #1a3a6b;
+    --mid:    #2e5fa3;
+    --sky:    #4a90d9;
+    --light:  #a8c8f0;
+    --pale:   #dceeff;
+    --white:  #ffffff;
+    --accent: #f0a500;
+    --green:  #27ae60;
+    --red:    #e74c3c;
+    --glass:  rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.15);
+    --orange: #e67e22;
+    --purple: #9b59b6;
+
+    --bg-deep:        #0d2b5e;
+    --input-bg:       rgba(255,255,255,0.06);
+    --input-border:   rgba(255,255,255,0.18);
+    --placeholder:    rgba(255,255,255,0.3);
+    --track:          rgba(255,255,255,.08);
+    --hairline:       rgba(255,255,255,.06);
+    --hairline-strong:rgba(255,255,255,.25);
+    --card-tint:      rgba(255,255,255,.04);
+    --panel-grad-1:   rgba(30,58,107,.7);
+    --panel-grad-2:   rgba(14,36,80,.7);
+  }
+
+  html[data-theme="light"] {
+    --navy:   #eef4fc;
+    --blue:   #dce8fa;
+    --mid:    #2e5fa3;
+    --sky:    #2f74c6;
+    --light:  #5c7699;
+    --pale:   #2a4566;
+    --white:  #122337;
+    --accent: #c97f00;
+    --green:  #1f9254;
+    --red:    #d6432f;
+    --glass:  rgba(20,45,80,0.045);
+    --border: rgba(20,45,80,0.13);
+
+    --bg-deep:        #ffffff;
+    --input-bg:       rgba(20,45,80,0.035);
+    --input-border:   rgba(20,45,80,0.16);
+    --placeholder:    rgba(20,45,80,0.4);
+    --track:          rgba(20,45,80,0.08);
+    --hairline:       rgba(20,45,80,0.09);
+    --hairline-strong:rgba(20,45,80,0.22);
+    --card-tint:      rgba(20,45,80,0.04);
+    --panel-grad-1:   rgba(223,236,255,0.85);
+    --panel-grad-2:   rgba(206,224,250,0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 50%, #0d2b5e 100%);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 20% 30%, rgba(74,144,217,0.12) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, rgba(30,90,163,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  header {
+    text-align: center;
+    padding: 52px 20px 36px;
+    position: relative;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(74,144,217,0.2);
+    border: 1px solid var(--sky);
+    color: var(--light);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 5px 18px;
+    border-radius: 100px;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    color: var(--white);
+    line-height: 1.15;
+  }
+  header h1 span { color: var(--sky); }
+  header p {
+    margin-top: 10px;
+    color: var(--light);
+    font-size: .95rem;
+    font-weight: 300;
+  }
+  .divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--sky), var(--accent));
+    border-radius: 2px;
+    margin: 20px auto 0;
+  }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 20px 60px; }
+
+  .section-label {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--pale);
+    margin: 36px 0 16px;
+  }
+  .section-label::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+  .section-label .icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--mid), var(--sky));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+  }
+
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .unit-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    backdrop-filter: blur(10px);
+    transition: transform .2s, box-shadow .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .unit-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--sky), var(--light));
+    border-radius: 16px 16px 0 0;
+  }
+  .unit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,.35);
+  }
+
+  .unit-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--white);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .unit-name .dot {
+    width: 8px; height: 8px;
+    background: var(--sky);
+    border-radius: 50%;
+  }
+
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--light);
+    margin-bottom: 5px;
+  }
+  .field input[type="number"] {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px;
+    padding: 9px 13px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .field input[type="number"]:focus {
+    border-color: var(--sky);
+    background: rgba(74,144,217,0.12);
+  }
+  .field input[type="number"]::placeholder { color: rgba(255,255,255,0.3); }
+
+  .histo-hint {
+    font-size: .7rem;
+    color: rgba(168,200,240,0.6);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  .unit-result {
+    margin-top: 14px;
+    padding: 9px 14px;
+    background: rgba(74,144,217,0.15);
+    border: 1px solid rgba(74,144,217,0.3);
+    border-radius: 9px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: .85rem;
+  }
+  .unit-result .lbl { color: var(--light); }
+  .unit-result .val {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--sky);
+  }
+
+  .subjects-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .subj-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    backdrop-filter: blur(10px);
+    position: relative; overflow: hidden;
+  }
+  .subj-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #f7d068);
+    border-radius: 16px 16px 0 0;
+  }
+  .subj-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--white);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .subj-name .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+
+  .calc-btn {
+    display: block;
+    width: 100%;
+    margin: 32px 0 0;
+    padding: 17px;
+    background: linear-gradient(135deg, var(--mid), var(--sky));
+    border: none;
+    border-radius: 14px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(42,111,200,.4);
+    transition: transform .18s, box-shadow .18s;
+  }
+  .calc-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(42,111,200,.55);
+  }
+  .calc-btn:active { transform: scale(.98); }
+
+  .result-panel {
+    margin-top: 32px;
+    background: linear-gradient(135deg, rgba(30,58,107,.7), rgba(14,36,80,.7));
+    border: 1px solid rgba(74,144,217,.4);
+    border-radius: 20px;
+    padding: 32px;
+    backdrop-filter: blur(14px);
+    display: none;
+    animation: fadeUp .4s ease;
+  }
+  .result-panel.show { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-top {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .result-top h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--pale);
+  }
+  .grade-circle {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: conic-gradient(var(--sky) 0%, rgba(255,255,255,.08) 0%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 0 0 4px rgba(74,144,217,.2);
+  }
+  .grade-circle .grade-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+  .grade-circle .grade-sub {
+    font-size: .72rem;
+    color: var(--light);
+    margin-top: 3px;
+  }
+  .grade-circle .grade-status {
+    position: absolute;
+    bottom: -10px;
+    left: 50%; transform: translateX(-50%);
+    padding: 3px 12px;
+    border-radius: 100px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .status-pass { background: var(--green); }
+  .status-fail { background: var(--red); }
+
+  .breakdown {
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+  }
+  .breakdown h3 {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--light);
+    margin-bottom: 14px;
+  }
+  .brow {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px 20px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    font-size: .88rem;
+  }
+  .brow:last-child { border-bottom: none; }
+  .brow .bname { color: var(--pale); }
+  .brow .bcoef { color: var(--light); font-size: .78rem; }
+  .brow .bval  { color: var(--sky); font-weight: 700; text-align: right; }
+
+  .formula-note {
+    margin-top: 22px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,.04);
+    border-left: 3px solid var(--sky);
+    border-radius: 0 10px 10px 0;
+    font-size: .8rem;
+    color: var(--light);
+    line-height: 1.7;
+  }
+  .formula-note strong { color: var(--white); }
+
+  .rattrapage-section {
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+    margin-top: 22px;
+  }
+  .rattrapage-section h3 {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--light);
+    margin-bottom: 6px;
+  }
+  .rattrapage-summary {
+    font-size: .85rem;
+    color: var(--light);
+    margin-bottom: 14px;
+  }
+  .mod-row {
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    border: 1px solid;
+  }
+  .mod-row.ok   { background: rgba(39,174,96,0.08);  border-color: rgba(39,174,96,0.3); }
+  .mod-row.warn { background: rgba(231,76,60,0.08);  border-color: rgba(231,76,60,0.35); }
+  .mod-row-top {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+  }
+  .mod-row-name { font-weight: 700; font-size: .92rem; color: var(--white); }
+  .mod-badge {
+    font-size: .66rem; font-weight: 700; letter-spacing: .05em;
+    padding: 3px 11px; border-radius: 100px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .mod-badge.ok   { background: var(--green); color: #fff; }
+  .mod-badge.warn { background: var(--red);   color: #fff; }
+  .mod-reason {
+    font-size: .78rem; color: var(--light);
+    margin-top: 6px; line-height: 1.5;
+  }
+  .mod-points {
+    font-size: .84rem; color: var(--accent);
+    font-weight: 600; margin-top: 6px; line-height: 1.5;
+  }
+
+  .sim-section {
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+    margin-top: 22px;
+  }
+  .sim-section h3 {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--light);
+    margin-bottom: 6px;
+  }
+  .sim-summary {
+    font-size: .85rem;
+    color: var(--light);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* Points manquants — 2 cas bien visibles (Module vs Unité) */
+  .deficit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 0 0 22px;
+  }
+  .deficit-card {
+    background: linear-gradient(160deg, rgba(240,165,0,0.12), rgba(240,165,0,0.03));
+    border: 1.5px solid rgba(240,165,0,0.4);
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .deficit-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .deficit-card.dc-module::before { background: linear-gradient(90deg, var(--sky), var(--light)); }
+  .deficit-card.dc-unite::before  { background: linear-gradient(90deg, var(--green), #6fe0a0); }
+  .deficit-card .dc-label {
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--light);
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .deficit-card .dc-label .dc-dot {
+    width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+  }
+  .dc-module .dc-dot { background: var(--sky); }
+  .dc-unite  .dc-dot { background: var(--green); }
+  .deficit-card .dc-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .deficit-card .dc-value span { font-size: 1rem; opacity: .7; }
+  .deficit-card .dc-sub {
+    font-size: .76rem;
+    color: rgba(168,200,240,0.7);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+  @media (max-width: 480px) {
+    .deficit-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Cartes de scénarios — objectif précis */
+  .sim-scenario {
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(240,165,0,0.3);
+    background: rgba(240,165,0,0.05);
+  }
+  .sim-scenario-title {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sim-scenario-title .scenario-num {
+    background: var(--accent);
+    color: var(--navy);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .sim-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+  }
+  .sim-table th {
+    text-align: left;
+    padding: 7px 8px;
+    color: var(--light);
+    font-weight: 600;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    border-bottom: 1px solid var(--border);
+  }
+  .sim-table td {
+    padding: 9px 8px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .sim-table tr:last-child td { border-bottom: none; }
+  .sim-need { font-weight: 700; color: var(--accent); }
+  .sim-need.possible { color: #4ac97e; }
+  .sim-need.impossible { color: var(--red); }
+  .sim-gain { font-size: .82rem; color: var(--light); font-weight: 600; }
+  .sim-avg-result {
+    margin-top: 12px;
+    padding: 9px 12px;
+    background: rgba(74,144,217,0.1);
+    border-radius: 8px;
+    font-size: .88rem;
+    text-align: center;
+  }
+  .sim-avg-result strong { color: var(--sky); }
+
+  .reset-btn {
+    display: block;
+    margin: 18px auto 0;
+    padding: 9px 28px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 100px;
+    color: var(--light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .reset-btn:hover { border-color: var(--sky); color: var(--sky); }
+
+  .save-bar {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin: 28px 0 0;
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    align-items: center;
+  }
+  .save-bar .save-info {
+    flex: 1; min-width: 160px;
+    font-size: .82rem;
+    color: var(--light);
+    line-height: 1.5;
+  }
+  .save-bar .save-info strong { color: var(--white); display: block; margin-bottom: 2px; }
+  .save-bar .save-info .last-saved { color: var(--accent); font-size: .75rem; }
+  .btn-save {
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #1a7a4a, #27ae60);
+    border: none; border-radius: 10px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 700;
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s;
+    box-shadow: 0 4px 14px rgba(39,174,96,.35);
+    white-space: nowrap;
+  }
+  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39,174,96,.5); }
+  .btn-load {
+    padding: 10px 22px;
+    background: rgba(74,144,217,0.18);
+    border: 1px solid rgba(74,144,217,0.4);
+    border-radius: 10px;
+    color: var(--sky);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    white-space: nowrap;
+  }
+  .btn-load:hover { background: rgba(74,144,217,0.28); }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--navy);
+    border: 1px solid var(--sky);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: .88rem;
+    color: var(--white);
+    box-shadow: 0 8px 28px rgba(0,0,0,.4);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s;
+    opacity: 0; z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── Footer signature ── */
+  .page-footer {
+    text-align: center;
+    padding: 24px 20px 32px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    margin-top: 40px;
+  }
+  .page-footer .sig {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .72rem;
+    color: rgba(168,200,240,0.45);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .page-footer .sig .dot-sep {
+    width: 3px; height: 3px;
+    background: rgba(168,200,240,0.3);
+    border-radius: 50%;
+  }
+  .page-footer .sig strong {
+    color: rgba(168,200,240,0.7);
+    font-weight: 600;
+    letter-spacing: .08em;
+  }
+
+  @media (max-width: 560px) {
+    .subjects-row { grid-template-columns: 1fr; }
+    .grade-circle { width: 90px; height: 90px; }
+    .grade-circle .grade-val { font-size: 1.6rem; }
+    .sim-table { font-size: .75rem; }
+    .sim-table th, .sim-table td { padding: 5px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Faculté de Médecine</div>
+  <h1>Calculateur de Moyenne<br><span>2ème Année</span></h1>
+  <p>Entrez vos notes pour obtenir votre moyenne annuelle</p>
+  <div class="divider"></div>
+</header>
+
+<div class="container">
+
+  <div class="section-label">
+    <div class="icon">🫀</div>
+    Unités d'enseignement (coeff. 4 chacune)
+  </div>
+
+  <div class="units-grid" id="unitsGrid"></div>
+
+  <div class="section-label">
+    <div class="icon">🧬</div>
+    Matières transversales (coeff. 2 chacune)
+  </div>
+
+  <div class="subjects-row">
+    <div class="subj-card">
+      <div class="subj-name"><span class="dot"></span>Génétique</div>
+      <div class="field">
+        <label>Note EMD Génétique</label>
+        <input type="number" id="genetique_emd" min="0" max="20" step="0.01" placeholder="0 – 20" oninput="updateGenetique()">
+      </div>
+      <div class="field">
+        <label>Note TP Génétique</label>
+        <input type="number" id="genetique_tp" min="0" max="20" step="0.01" placeholder="0 – 20" oninput="updateGenetique()">
+      </div>
+      <div class="unit-result">
+        <span class="lbl">Moyenne module</span>
+        <span class="val" id="genetique_res">—</span>
+      </div>
+    </div>
+    <div class="subj-card">
+      <div class="subj-name"><span class="dot"></span>Immunologie</div>
+      <div class="field">
+        <label>Note EMD Immunologie</label>
+        <input type="number" id="immuno" min="0" max="20" step="0.01" placeholder="0 – 20">
+      </div>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <div class="save-info">
+      <strong>💾 Sauvegarde des notes</strong>
+      <span class="last-saved" id="lastSavedLabel">Aucune sauvegarde trouvée</span>
+    </div>
+    <button class="btn-load" onclick="loadData()">⬆ Charger</button>
+    <button class="btn-save" onclick="saveData()">✔ Sauvegarder</button>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">⚡ Calculer ma moyenne annuelle</button>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="result-top">
+      <div>
+        <h2>Résultat final</h2>
+        <p style="color:var(--light);font-size:.85rem;margin-top:4px">Moyenne pondérée sur 20</p>
+      </div>
+      <div style="position:relative;padding-bottom:14px;">
+        <div class="grade-circle" id="gradeCircle">
+          <div class="grade-val" id="gradeVal">—</div>
+          <div class="grade-sub">/ 20</div>
+          <div class="grade-status" id="gradeStatus"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <h3>Détail du calcul</h3>
+      <div id="breakdownRows"></div>
+    </div>
+
+    <div class="rattrapage-section">
+      <h3>📋 Bilan des rattrapages</h3>
+      <p class="rattrapage-summary" id="rattrapageSummary"></p>
+      <div id="rattrapageRows"></div>
+    </div>
+
+    <div class="sim-section" id="simSection" style="display:none;">
+      <h3>🎯 Simulateur de rattrapage</h3>
+      <p class="sim-summary" id="simSummary"></p>
+      <div id="simScenarios"></div>
+    </div>
+
+    <div class="formula-note">
+      <strong>Unité (sans TP Histo) :</strong> (EMD×4 + TP Anato) ÷ 5<br>
+      <strong>Unité (avec TP Histo) :</strong> (EMD×4 + TP Anato÷2 + TP Histo÷2) ÷ 5<br>
+      <strong>Génétique :</strong> EMD × 0.80 + TP × 0.20<br>
+      <strong>Moyenne finale :</strong>
+      Σ(note × coeff) ÷ Σ(coefficients) &nbsp;|&nbsp; coeff unité = 4, coeff matière = 2<br>
+      <strong>Note éliminatoire :</strong> moyenne module/unité &lt; 5/20 impose le rattrapage obligatoire.
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↺ Réinitialiser</button>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="page-footer">
+  <div class="sig">
+    <span>Conçu par</span>
+    <span class="dot-sep"></span>
+    <strong>Mohammed Mounir</strong>
+    <span class="dot-sep"></span>
+    <span>2ème Année Médecine · 2025</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const UNITS = [
+  { id: 'neuro',    label: 'Neurologie' },
+  { id: 'digest',   label: 'Digestif' },
+  { id: 'urinaire', label: 'Urinaire' },
+  { id: 'cardio',   label: 'Cardiologie' },
+  { id: 'endo',     label: 'Endocrinologie' },
+];
+
+const TOTAL_COEFF = 24;
+
+const grid = document.getElementById('unitsGrid');
+let unitsHTML = '';
+UNITS.forEach(u => {
+  unitsHTML += `
+  <div class="unit-card" id="card-${u.id}">
+    <div class="unit-name"><span class="dot"></span>${u.label}</div>
+    <div class="field">
+      <label>Note EMD</label>
+      <input type="number" id="${u.id}_emd" min="0" max="20" step="0.01" placeholder="0 – 20" oninput="updateUnit('${u.id}')">
+    </div>
+    <div class="field">
+      <label>Note TP Anatomie</label>
+      <input type="number" id="${u.id}_tpanato" min="0" max="20" step="0.01" placeholder="0 – 20" oninput="updateUnit('${u.id}')">
+    </div>
+    <div class="field">
+      <label>Note TP Histologie <span style="color:var(--accent);font-size:.7rem">(optionnel)</span></label>
+      <input type="number" id="${u.id}_tphisto" min="0" max="20" step="0.01" placeholder="Laisser vide si absent" oninput="updateUnit('${u.id}')">
+      <div class="histo-hint">Si rempli → formule avec TP Histo activée automatiquement</div>
+    </div>
+    <div class="unit-result">
+      <span class="lbl">Moyenne unité</span>
+      <span class="val" id="${u.id}_res">—</span>
+    </div>
+  </div>`;
+});
+grid.innerHTML = unitsHTML;
+
+function unitGrade(id) {
+  const emd      = parseFloat(document.getElementById(id + '_emd').value);
+  const tpAnato  = parseFloat(document.getElementById(id + '_tpanato').value);
+  const tpHistoRaw = document.getElementById(id + '_tphisto').value.trim();
+  const tpHisto  = tpHistoRaw !== '' ? parseFloat(tpHistoRaw) : NaN;
+  if (isNaN(emd) || isNaN(tpAnato)) return null;
+  let sum;
+  if (!isNaN(tpHisto)) {
+    sum = emd * 4 + tpAnato / 2 + tpHisto / 2;
+  } else {
+    sum = emd * 4 + tpAnato;
+  }
+  return sum / 5;
+}
+
+function unitEliminatoryFails(id) {
+  const grade = unitGrade(id);
+  return (grade !== null && grade < 5) ? ['Moyenne unité (' + grade.toFixed(2) + ')'] : [];
+}
+
+function geneticGrade() {
+  const emd = parseFloat(document.getElementById('genetique_emd').value);
+  const tp  = parseFloat(document.getElementById('genetique_tp').value);
+  if (isNaN(emd) || isNaN(tp)) return null;
+  return emd * 0.8 + tp * 0.2;
+}
+
+function genetiqueEliminatoryFails() {
+  const grade = geneticGrade();
+  return (grade !== null && grade < 5) ? ['Moyenne Génétique (' + grade.toFixed(2) + ')'] : [];
+}
+
+function updateUnit(id) {
+  const g  = unitGrade(id);
+  const el = document.getElementById(id + '_res');
+  el.textContent = g !== null ? g.toFixed(2) : '—';
+  el.style.color = g !== null ? (g >= 10 ? '#4ac97e' : '#e74c3c') : 'var(--sky)';
+}
+
+function updateGenetique() {
+  const g  = geneticGrade();
+  const el = document.getElementById('genetique_res');
+  el.textContent = g !== null ? g.toFixed(2) : '—';
+  el.style.color = g !== null ? (g >= 10 ? '#4ac97e' : '#e74c3c') : 'var(--sky)';
+}
+
+function buildTargetScenarios(allModules) {
+  const TARGETS = [10, 10.4, 11.2];
+
+  const validModules   = allModules.filter(m => !m.isRattrapage);
+  const validWeighted  = validModules.reduce((s, m) => s + m.grade * m.coeff, 0);
+  const rattrapageMods = allModules.filter(m => m.isRattrapage);
+  if (rattrapageMods.length === 0) return null;
+
+  const coeffSum = rattrapageMods.reduce((s, m) => s + m.coeff, 0);
+
+  const scenarios = TARGETS.map(target => {
+    const targetTotal     = target * TOTAL_COEFF;
+    const neededFromRatt  = targetTotal - validWeighted;
+    const sameNote        = neededFromRatt / coeffSum;
+    const avgResult       = (validWeighted + sameNote * coeffSum) / TOTAL_COEFF;
+    return {
+      target,
+      rows: rattrapageMods.map(m => ({ name: m.name, coeff: m.coeff, current: m.grade, needed: sameNote })),
+      avgResult
+    };
+  });
+
+  return scenarios;
+}
+
+function calculate() {
+  let totalWeighted = 0;
+  let totalCoeff    = 0;
+  let rows          = '';
+  let allModules    = [];
+  let hasEliminatory = false;
+
+  for (const u of UNITS) {
+    const g = unitGrade(u.id);
+    if (g === null) { alert('⚠️ Veuillez remplir toutes les notes des unités correctement.'); return; }
+    totalWeighted += g * 4;
+    totalCoeff    += 4;
+    const fails    = unitEliminatoryFails(u.id);
+    const isElim   = fails.length > 0;
+    if (isElim) hasEliminatory = true;
+    allModules.push({ name: u.label, grade: g, coeff: 4, isRattrapage: g < 10 || isElim, isEliminatory: isElim, fails });
+    rows += `<div class="brow"><span class="bname">${u.label}</span><span class="bcoef">× 4</span><span class="bval">${g.toFixed(2)}</span></div>`;
+  }
+
+  const gen = geneticGrade();
+  if (gen === null) { alert('⚠️ Veuillez remplir les notes de Génétique (EMD et TP).'); return; }
+  totalWeighted += gen * 2; totalCoeff += 2;
+  const genFails = genetiqueEliminatoryFails();
+  const genElim  = genFails.length > 0;
+  if (genElim) hasEliminatory = true;
+  allModules.push({ name: 'Génétique', grade: gen, coeff: 2, isRattrapage: gen < 10 || genElim, isEliminatory: genElim, fails: genFails });
+  rows += `<div class="brow"><span class="bname">Génétique</span><span class="bcoef">× 2</span><span class="bval">${gen.toFixed(2)}</span></div>`;
+
+  const imm = parseFloat(document.getElementById('immuno').value);
+  if (isNaN(imm)) { alert("⚠️ Veuillez entrer la note d'Immunologie."); return; }
+  totalWeighted += imm * 2; totalCoeff += 2;
+  const immElim = imm < 5;
+  if (immElim) hasEliminatory = true;
+  allModules.push({ name: 'Immunologie', grade: imm, coeff: 2, isRattrapage: imm < 10 || immElim, isEliminatory: immElim, fails: immElim ? ['Moyenne Immunologie (' + imm.toFixed(2) + ')'] : [] });
+  rows += `<div class="brow"><span class="bname">Immunologie</span><span class="bcoef">× 2</span><span class="bval">${imm.toFixed(2)}</span></div>`;
+
+  rows += `<div class="brow" style="border-top:1px solid rgba(255,255,255,.2);margin-top:6px;padding-top:12px;font-weight:700;">
+    <span class="bname" style="color:var(--white)">Total pondéré</span>
+    <span class="bcoef" style="color:var(--light)">÷ ${totalCoeff}</span>
+    <span class="bval" style="color:var(--white);font-size:1rem">${(totalWeighted/totalCoeff).toFixed(3)}</span>
+  </div>`;
+
+  const avg = totalWeighted / totalCoeff;
+  document.getElementById('gradeVal').textContent    = avg.toFixed(2);
+  document.getElementById('breakdownRows').innerHTML = rows;
+
+  const rattrapageMods = allModules.filter(m => m.isRattrapage);
+  const rattSummaryEl  = document.getElementById('rattrapageSummary');
+  const rattRowsEl     = document.getElementById('rattrapageRows');
+
+  if (rattrapageMods.length === 0) {
+    rattSummaryEl.textContent = '✅ Aucun rattrapage nécessaire. Tous les modules sont validés.';
+    rattRowsEl.innerHTML = '';
+    document.getElementById('simSection').style.display = 'none';
+  } else {
+    const elimCount = rattrapageMods.filter(m => m.isEliminatory).length;
+    rattSummaryEl.textContent = `${rattrapageMods.length} module(s) en rattrapage` +
+      (elimCount > 0 ? ` — dont ${elimCount} avec moyenne éliminatoire (< 5)` : '');
+
+    rattRowsEl.innerHTML = rattrapageMods.map(m => `
+      <div class="mod-row ${m.isEliminatory ? 'warn' : 'ok'}">
+        <div class="mod-row-top">
+          <span class="mod-row-name">${m.name}</span>
+          <span class="mod-badge ${m.isEliminatory ? 'warn' : 'ok'}">${m.isEliminatory ? 'ÉLIMINATOIRE' : 'RATTRAPAGE'}</span>
+        </div>
+        ${m.fails.length > 0
+          ? `<div class="mod-reason">❌ Moyenne éliminatoire : ${m.fails.join(', ')}</div>`
+          : `<div class="mod-reason">⚠️ Moyenne module < 10 (${m.grade.toFixed(2)})</div>`}
+        <div class="mod-points">Moyenne actuelle : ${m.grade.toFixed(2)} / 20</div>
+      </div>`).join('');
+
+    // ── Cartes "Points manquants" (Module coeff 2 vs Unité coeff 4) ──
+    document.getElementById('simSection').style.display = 'block';
+    const deficit       = Math.max(10 * TOTAL_COEFF - totalWeighted, 0);
+    const gainIfModule  = deficit / 2;
+    const gainIfUnite   = deficit / 4;
+
+    document.getElementById('simSummary').innerHTML = `
+      <div class="deficit-grid">
+        <div class="deficit-card dc-module">
+          <div class="dc-label"><span class="dc-dot"></span>Si c'est un Module <span style="opacity:.6">(coeff 2)</span></div>
+          <div class="dc-value">+${gainIfModule.toFixed(2)} <span>pts</span></div>
+          <div class="dc-sub">de gain nécessaire dans ce module pour atteindre 10/20 annuel</div>
+        </div>
+        <div class="deficit-card dc-unite">
+          <div class="dc-label"><span class="dc-dot"></span>Si c'est une Unité <span style="opacity:.6">(coeff 4)</span></div>
+          <div class="dc-value">+${gainIfUnite.toFixed(2)} <span>pts</span></div>
+          <div class="dc-sub">de gain nécessaire dans cette unité pour atteindre 10/20 annuel</div>
+        </div>
+      </div>`;
+
+    // ── Scénarios "Même note dans tous les rattrapages" pour 3 objectifs précis ──
+    const scenarios = buildTargetScenarios(allModules);
+    document.getElementById('simScenarios').innerHTML = scenarios.map((s, idx) => {
+      const allPossible = s.rows.every(r => r.needed <= 20);
+      return `
+      <div class="sim-scenario">
+        <div class="sim-scenario-title">
+          <span class="scenario-num">${idx + 1}</span>Objectif ${s.target.toFixed(2)}/20
+        </div>
+        <p style="font-size:.78rem;color:var(--light);margin-bottom:10px">Même note obtenue dans chaque module en rattrapage</p>
+        <table class="sim-table">
+          <thead><tr><th>Module</th><th>Coeff</th><th>Actuel</th><th>Objectif</th><th>Gain</th></tr></thead>
+          <tbody>${s.rows.map(r => {
+            const ok   = r.needed <= 20;
+            const val  = Math.min(Math.max(r.needed, 0), 20);
+            const gain = val - r.current;
+            const gainStr = (gain >= 0 ? '+' : '') + gain.toFixed(2);
+            return `<tr>
+              <td>${r.name}</td>
+              <td style="color:var(--light)">× ${r.coeff}</td>
+              <td style="color:var(--light)">${r.current.toFixed(2)}</td>
+              <td class="sim-need ${ok ? 'possible' : 'impossible'}">${val.toFixed(2)}${!ok ? ' ❌' : ''}</td>
+              <td class="sim-gain">${gainStr}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+        <div class="sim-avg-result">
+          Moyenne projetée : <strong>${s.avgResult.toFixed(2)} / 20</strong>
+          ${!allPossible ? ' <span style="color:var(--red)">(Impossible — note &gt; 20 requise)</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const isAdmis = avg >= 10 && !hasEliminatory;
+  const statusEl = document.getElementById('gradeStatus');
+  statusEl.textContent = isAdmis ? 'ADMIS' : 'RATTRAPAGE';
+  statusEl.className   = 'grade-status ' + (isAdmis ? 'status-pass' : 'status-fail');
+
+  const pct = Math.min(avg / 20, 1) * 100;
+  document.getElementById('gradeCircle').style.background =
+    `conic-gradient(${isAdmis ? '#4ac97e' : '#e74c3c'} ${pct}%, rgba(255,255,255,.08) ${pct}%)`;
+
+  document.getElementById('resultPanel').classList.add('show');
+  document.getElementById('resultPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function saveData() {
+  const data = { savedAt: new Date().toLocaleString('fr-FR') };
+  UNITS.forEach(u => {
+    data[u.id + '_emd']     = document.getElementById(u.id + '_emd').value;
+    data[u.id + '_tpanato'] = document.getElementById(u.id + '_tpanato').value;
+    data[u.id + '_tphisto'] = document.getElementById(u.id + '_tphisto').value;
+  });
+  data['genetique_emd'] = document.getElementById('genetique_emd').value;
+  data['genetique_tp']  = document.getElementById('genetique_tp').value;
+  data['immuno']        = document.getElementById('immuno').value;
+  localStorage.setItem('med2_notes', JSON.stringify(data));
+  document.getElementById('lastSavedLabel').textContent = '✔ Sauvegardé le ' + data.savedAt;
+  showToast('✔ Notes sauvegardées avec succès !');
+}
+
+function loadData() {
+  const raw = localStorage.getItem('med2_notes');
+  if (!raw) { showToast('⚠️ Aucune sauvegarde trouvée'); return; }
+  const data = JSON.parse(raw);
+  UNITS.forEach(u => {
+    document.getElementById(u.id + '_emd').value     = data[u.id + '_emd']     || '';
+    document.getElementById(u.id + '_tpanato').value = data[u.id + '_tpanato'] || '';
+    document.getElementById(u.id + '_tphisto').value = data[u.id + '_tphisto'] || '';
+    updateUnit(u.id);
+  });
+  document.getElementById('genetique_emd').value = data['genetique_emd'] || '';
+  document.getElementById('genetique_tp').value  = data['genetique_tp']  || '';
+  document.getElementById('immuno').value        = data['immuno']        || '';
+  updateGenetique();
+  document.getElementById('lastSavedLabel').textContent = '⬆ Chargé — sauvegardé le ' + (data.savedAt || '?');
+  showToast('⬆ Notes chargées avec succès !');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const raw = localStorage.getItem('med2_notes');
+  if (raw) {
+    const data = JSON.parse(raw);
+    document.getElementById('lastSavedLabel').textContent =
+      '💾 Sauvegarde disponible — ' + (data.savedAt || '');
+  }
+});
+
+function resetAll() {
+  document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+  UNITS.forEach(u => {
+    document.getElementById(u.id + '_res').textContent = '—';
+    document.getElementById(u.id + '_res').style.color = 'var(--sky)';
+  });
+  document.getElementById('genetique_res').textContent = '—';
+  document.getElementById('genetique_res').style.color = 'var(--sky)';
+  document.getElementById('resultPanel').classList.remove('show');
+  showToast('↺ Formulaire réinitialisé');
+}
+</script>
+</body>
+</html>
